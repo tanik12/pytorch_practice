@@ -4,7 +4,7 @@ from utils.data_augumentation import Compose, ConvertFromInts, ToAbsoluteCoords,
 PhotometricDistort, Expand, RandomSampleCrop, RandomMirror, ToPercentCoords, Resize, SubtractMeans
 
 from get_anno_data import Anno_xml2list
-from get_data_set import make_datapath_list
+from get_datapath import make_datapath_list
 import cv2
 import xml.etree.ElementTree as ET
 

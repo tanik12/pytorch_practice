@@ -14,7 +14,7 @@ import torch.utils.data as data
 import torchvision
 from torchvision import models, transforms
 
-from get_data_set import make_datapath_list
+from get_datapath import make_datapath_list
 import cv2
 import xml.etree.ElementTree as ET 
 
