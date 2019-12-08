@@ -23,10 +23,9 @@ def make_datapath_list():
     for img_idx in range(200):
         img_path = rootpath + "img_78/img_7_" + str(img_idx) + ".jpg"
         train_img_list.append(img_path)
-
+        
         img_path = rootpath + "img_78/img_8_" + str(img_idx) + ".jpg"
         train_img_list.append(img_path)
-
     return train_img_list
 
 class ImageTransform():

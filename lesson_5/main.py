@@ -51,6 +51,12 @@ num_epochs = 200
 G_update, D_update = train_model(
         G, D, dataloader=train_dataloader, num_epochs=num_epochs)
 
+#pytorchのネットワークパラメータの保存
+#save_path = './Genetayor.pth'
+#torch.save(G_update.state_dict(), save_path)
+#save_path = './Discriminator.pth'
+#torch.save(D_update.state_dict(), save_path)
+
 #生成画像と訓練データを可視化する
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -73,4 +79,6 @@ for i in range(0, 5):
 
     #下段に生成データを表示する
     plt.subplot(2, 5, 5+i+1)
-    plt.imshow(fake_imges[i][0].cpu().detach().numpy(), 'gray')
+    plt.imshow(fake_images[i][0].cpu().detach().numpy(), 'gray')
+    if i == 4:
+        plt.show()
