@@ -46,6 +46,70 @@ class SSD(nn.Module):
         if phase == "inference":
             self.detect = Detect()
 
+    def forward(self, x):
+        sources = list() #locとconfへの入力source1~6を格納
+        loc = list() #locの出力を格納
+        conf = list() #confの出力を格納
+
+        #vggのconv4_3まで計算する
+        for k in range(23):
+            x = self.vgg[k](x)
+
+        #conv4_3の出力をL2Normに入力し、source1を作成、sourceに追加
+        source1 = self.L2Norm(x)
+        sources.append(source1)
+
+        #vggを最後まで計算し、source2を作成、sourcesに追加
+        for k in range(23, len(self.vgg)):
+            x = self.vgg[k](x)
+
+        source.append(x)
+
+        #extrasのconvとReLUを計算
+        #source3~6をsourcesに追加
+        for k, v in enumerate(self.extras):
+            x = F.relu(v(x), inplace=True)
+            if k % 2 == 1: #conv→ReLU→conv→ReLUをしたらsourcesに入れる
+                sources.append(x)
+
+        #source1~6にそれぞれに対応する畳み込みを１回ずつ適応する
+        #zipでforループの複数のリストの要素を取得
+        #source1~6まであるので、6回ループが回る
+        for (x, l, c) in zip(source, self.loc, self.conf):
+            #Permuteは要素の順番の入れ替え
+            loc.append(l(x).permute(0, 2, 3, 1).contiguous())
+            conf.append(c(x).permute(0, 2, 3, 1).contiguous())
+            #l(x)とc(x)で畳み込みを実施
+            #l(x)とc(x)の出力サイズは[batch_num, 4*アスペクト比の種類数, featuremapの高さ, featuremap幅]
+            #sourceによって、アスペクト比の種類数が異なり、面倒なので順番の入れ替えで整える
+            #permuteで要素の順番を入れ替え
+            #[minibatch数、featuremap数、featuremap数×アスペクト比の種類数]へ
+            #torch.contiguous()はメモリ上で要素を連続的に配置し直す命令です
+            #あとでview関数を使用します。
+            #このviewを行うためには,対象の変数がメモリ上で連続配置されている必要がある。
+
+        #さらにlocとconfの形を変形
+        #locサイズはtorch.Size([batch_num, 34928])
+        #confのサイズはtorch.Size(batch_num, 183372)になる
+        loc = torch.cat([o.view(o.view(0), -1) for o in loc], 1)
+        conf = torch.cat([o.view(o.view(0), -1) for o in conf], 1)
+
+        #さらにlocとconfの形を整える
+        #locのサイズはtorch.Size([batch_num, 8732, 4])
+        #confのサイズはtorch.Size([batch_num, 8732, 21])
+        loc = loc.view(loc.size(0), -1, 4)
+        conf = conf.view(conf.size(0), -1, self.num_classes)
+
+        #最後に出力する
+        output = (loc, conf, self.dbox_list)
+
+        if self.phase == "inference": #推論時
+            #クラス「Detect」のforwardを実行
+            #返り値のサイズはtorch.Size([batch_num, 21, 200, 5])
+            return self.detect(output[0], output[1], output[2])
+        else: #学習時
+            return output #返り値は(loc, conf, db_list)のタプル
+
 if __name__ == "__main__":
     #動作確認
     #SSD300の設定
