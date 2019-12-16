@@ -66,7 +66,7 @@ if __name__ == "__main__":
                              transform_anno=Anno_xml2list(voc_classes))
 
     ###
-    batch_size = 4
+    batch_size = 32
 
     train_dataloader = data.DataLoader(
             train_dataset, batch_size=batch_size, shuffle=True, collate_fn=od_collate_fn)

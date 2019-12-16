@@ -16,9 +16,9 @@ from utils.data_augumentation import Compose, ConvertFromInts, ToAbsoluteCoords,
 #8層に渡る、extrasモジュールを作成
 def make_extras():
     layers = []
-    in_channels = 1024 #vggモジュールから出力された、extraに入力される画像チャネル数
+    in_channels = 1024  # vggモジュールから出力された、extraに入力される画像チャネル数
 
-    #extraモジュールの畳み込み層のチャネル数を設定するコンフィグレーション
+    # extraモジュールの畳み込み層のチャネル数を設定するコンフィギュレーション
     cfg = [256, 512, 128, 256, 128, 256, 128, 256]
 
     layers += [nn.Conv2d(in_channels, cfg[0], kernel_size=(1))]
