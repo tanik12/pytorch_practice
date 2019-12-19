@@ -102,13 +102,15 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
 
                         optimizer.step() #パラメータ更新
 
-                        if (iteration % 10 == 0): #10iterに一度、lossを表示
+                        if (iteration % 10 == 0):  # 10iterに1度、lossを表示
                             t_iter_finish = time.time()
                             duration = t_iter_finish - t_iter_start
-                            print('イテレーション {} || Loss:{:.4} || 10 iter:{:.4f} sec.'.format(
+                            print('イテレーション {} || Loss: {:.4f} || 10iter: {:.4f} sec.'.format(
                                 iteration, loss.item(), duration))
-                            t_iter_start_loss += loss.item()
-                            iteration += 1
+                            t_iter_start = time.time()
+
+                        epoch_train_loss += loss.item()
+                        iteration += 1
 
                     #検証時
                     else:
@@ -132,8 +134,8 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
             epoch_val_loss = 0.0 #epochの損失和
 
             #ネットワークを保存する
-            #if ((epoch+1) % 10 == 0):
-            if ((epoch+1) % 1 == 0):
+            if ((epoch+1) % 10 == 0):
+            #if ((epoch+1) % 1 == 0):
                 torch.save(net.state_dict, 'weights/ssd300_' + str(epoch+1) + '.pth')
 
 
@@ -142,7 +144,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
 
 if __name__ == "__main__":
     #画像の読み込み
-    rootpath = "/Users/gisen/git/pytorch_advanced/2_objectdetection/data/VOCdevkit/VOC2012/"
+    rootpath = "/home/gisen/git/pytorch_advanced/2_objectdetection/data/VOCdevkit/VOC2012/"
     train_img_list, train_anno_list, val_img_list, val_anno_list = make_datapath_list(rootpath)
 
     #アノテーションをリストに
@@ -215,5 +217,5 @@ if __name__ == "__main__":
     optimizer = optim.SGD(net.parameters(), lr=1e-3, momentum=0.9, weight_decay=5e-4)
 
     #学習・検証を実行する
-    num_epochs = 1
+    num_epochs = 300
     train_model(net, dataloaders_dict, criterion, optimizer, num_epochs=num_epochs)
